@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simple Weather App - WeatherAPI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: rgba(149, 239, 244, 0.516);
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .weather-result {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            background-color: rgba(128, 128, 128, 0.327);
+            padding: 20px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body id="body">
+
+    <h2>Weather Search</h2>
+
+    <input type="text" id="cityInput" placeholder="Type city name..." autocomplete="off" />
+    <button id="searchBtn">Search</button>
+
+    <div class="weather-result" id="weatherResult"></div>
+
+    <script>
+        const input = document.getElementById('cityInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const weatherResult = document.getElementById('weatherResult');
+        const body = document.getElementById('body')
+
+        const API_KEY = 'b28910220d1e43e8a35151811250706'; // جایگزین کن با کلید خودت
+
+        function fetchWeather(cityName) {
+            weatherResult.innerHTML = 'Loading...';
+
+            fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(cityName)}&aqi=no`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        weatherResult.innerHTML = `<p>City not found: ${cityName}</p>`;
+                        return;
+                    }
+
+                    const { location, current } = data;
+                    console.log(data)
+
+                    weatherResult.innerHTML = `
+            <h3>Weather for ${location.name}, ${location.country}</h3>
+            <p><strong>Temperature:</strong> ${current.temp_c} °C</p>
+            <p><strong>Temperature in F:</strong> ${current.temp_f} °F</p>
+            <p><strong>Condition:</strong> ${current.condition.text}</p>
+            <img src="https:${current.condition.icon}" alt="weather icon">
+            <p><strong>Humidity:</strong> ${current.humidity}%</p>
+            <p><strong>Wind:</strong> ${current.wind_kph} km/h</p>
+            <p><strong>Local Time:</strong> ${location.localtime}</p>
+          `;
+                    if (current.is_day) {
+                        body.style.backgroundImage = 'URL(img/pc.webp)'
+                         weatherResult.style.color='black'
+
+                    } else {
+                        body.style.backgroundImage = 'URL(img/pcn.jpg)'
+                        weatherResult.style.color='rgba(250, 235, 215, 0.516)'
+
+                    }
+                })
+                .catch(() => {
+                    weatherResult.innerHTML = '<p>Error fetching weather data.</p>';
+                });
+        }
+
+        searchBtn.addEventListener('click', () => {
+            const city = input.value.trim();
+            if (city) {
+                fetchWeather(city);
+            }
+        });
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchBtn.click();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
